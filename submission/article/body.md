@@ -19,14 +19,14 @@ What it does, as a product:
 
 Here is a real turn against the deployed agent. The operator types "Schedule W-ANALYTICS-01 for the lowest carbon while meeting its deadline." The agent produces five feasible candidates, the decider prefers candidate C3 (shift the job six hours and run it in eu-west-1) at confidence 0.68, the application re-validates that choice and accepts it, and Amazon Bedrock explains the result: run in eu-west-1 starting in six hours, avoiding an estimated 3.64 kg CO2e versus running now, finishing six hours before the deadline. A second turn schedules a high-priority report (W-REPORT-05); the decider picks the cleaner region that still keeps a safe margin, at confidence 0.75. A third asks for the urgent billing reconciliation (W-BILLING-03); only one option is feasible, so the agent runs it now and never calls the decider. Carbon never delays an urgent job.
 
-< FIGURE 1 of 6: upload submission/article/img/demo.png here >
-Alt text: The demo UI: the conversation on the left, the decider's typed answers and verdict on the right
+< FIGURE 1 of 8: upload submission/article/img/carbon-confident.png here >
+Alt text: The demo UI: on the right, the decision panel lists all five candidates with their emissions and deadline margins, marks the candidate Strands Decider 2B preferred and the one the application finally scheduled, and shows the confidence and an independent re-validation line
 
 ## How I built it
 
 CarbonShift AI is a Strands Agents app. Amazon Bedrock (Amazon Nova Pro on the deployed runtime) runs the conversation and writes the plain-language explanation. The tools (list the queue, profile a workload, generate candidates, estimate impact) are ordinary Strands tools over a deterministic scheduling engine. That engine is where every number and every hard constraint lives; the agent never asks a model to do arithmetic. Strands Decider 2B sits at one seam, between "here are the legal options" and "here is the schedule we will run." The whole thing is deployed to Amazon Bedrock AgentCore Runtime, which is what the demo video records. I built it spec-first in Kiro: a requirements, design and tasks document drove the scheduler, the decision pattern and the eval cases before any of it was wired together.
 
-< FIGURE 2 of 6: upload submission/article/img/architecture.png here >
+< FIGURE 2 of 8: upload submission/article/img/architecture.png here >
 Alt text: Architecture: the user, the agent with its tools and decision, Amazon Bedrock and Strands Decider 2B
 
 ## The decision I handed to Strands Decider 2B
@@ -50,6 +50,9 @@ QUESTIONS = {
 
 The options are stable candidate ids (C1..C5); the real detail lives in the state, which both the decider and the LLM baseline read. My code then decides what to do with the answer. If confidence is at or above 0.6 and the preferred candidate passes an independent re-validation against the hard constraints, the application runs it; otherwise it falls back to the deterministic lowest-emissions candidate and flags the schedule for operator review. The model classifies, the code acts, and the final choice is always re-validated, so the model can never override a hard constraint. The agent records the decider's preferred candidate separately from the one it finally scheduled, so you can see whether a fallback changed the outcome.
 
+< FIGURE 3 of 8: upload submission/article/img/carbon-fallback.png here >
+Alt text: A low-confidence case: the decider's confidence is 0.36, below the 0.6 threshold, so the panel shows the deterministic lowest-emissions fallback being used and the schedule flagged for operator review, with the independent re-validation still passing
+
 ## Measured
 
 I benchmarked the decider against the same typed question answered by an Amazon Bedrock style LLM (qwen3.5-4b through the AWS User Group Madurai cloud), on a held-out test split of 13 labelled cases I did not tune on. The decider ran on the hosted Strands Decider 2B API.
@@ -67,16 +70,21 @@ Decider: strands-decider-2b-hobson-v19 (ugmdu). 13 labelled cases, 13 decisions.
 
 Two honest points. First, latency: the LLM's median was not far off the decider's, but its tail was long and load-dependent (a p95 of 14.7 seconds against the decider's steady 3.8), so across runs the median speedup swung between about 1.5x and 4.7x. The decider's real win here is not a single big number, it is consistency and cost. Second, confidence: the decider only cleared a 0.7 bar on about 8 percent of cases, yet it was correct on all 13. That is not a flaw. These are close trade-offs, so the probability mass splits across several good candidates and the top pick sits near 0.5. The agent's operating threshold is 0.6, and below it the application does not trust the model alone; it uses the deterministic fallback and asks for review. So a low-confidence call still lands on a safe, correct schedule, and you can watch it happen in the demo.
 
-< FIGURE 3 of 6: upload submission/article/img/bench-accuracy.png here >
+The demo app exposes this benchmark in a Benchmark tab, so you can see the real held-out cases and the decider-versus-LLM result in the product itself, not only in a report.
+
+< FIGURE 4 of 8: upload submission/article/img/carbon-benchmark.png here >
+Alt text: The Benchmark tab in the demo UI, showing the 13 held-out test cases with the decider's pick, confidence and the LLM's pick, plus summary metrics and the 0.6 operating threshold
+
+< FIGURE 5 of 8: upload submission/article/img/bench-accuracy.png here >
 Alt text: Accuracy of Strands Decider 2B and the Bedrock LLM on the labelled cases
 
-< FIGURE 4 of 6: upload submission/article/img/bench-latency.png here >
+< FIGURE 6 of 8: upload submission/article/img/bench-latency.png here >
 Alt text: Median latency per decision for both
 
-< FIGURE 5 of 6: upload submission/article/img/bench-cost.png here >
+< FIGURE 7 of 8: upload submission/article/img/bench-cost.png here >
 Alt text: Cost per 1,000 decisions for both
 
-< FIGURE 6 of 6: upload submission/article/img/bench-confidence.png here >
+< FIGURE 8 of 8: upload submission/article/img/bench-confidence.png here >
 Alt text: Accuracy against the share of decisions answered without a human, as the confidence threshold moves
 
 ## The reusable decision pattern
