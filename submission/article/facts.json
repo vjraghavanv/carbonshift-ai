@@ -1,0 +1,255 @@
+{
+ "pattern_tag": "#tool-selection",
+ "agentcore_features": [],
+ "pattern_doc": "REUSABLE DECISION PATTERN: carbon-aware schedule selection  (#tool-selection)\n\nWhat it does\n    A deterministic scheduler produces a small, bounded set of *feasible* execution candidates for\n    a flexible workload (hard constraints - deadline, capacity, region eligibility, flexibility -\n    are already enforced in code; see agent/scheduler.py). Strands Decider 2B then answers one\n    `choice` question: which feasible candidate best balances lower estimated carbon emissions\n    against a safe deadline margin and the workload's priority?\n\n    This is a judgement, not arithmetic. Picking the literal minimum-emissions candidate is a\n    one-line `min()` and is never handed to the model. The model weighs the prose trade-off -\n    how much carbon each option really saves, how thin it cuts the deadline margin, how urgent the\n    workload is - the kind of call reasonable operators disagree on. Facts (per-candidate energy\n    and emissions) are computed in code and written into the state; the model never invents them.\n\nTyped questions and options\n    best_candidate (choice): options are stable candidate ids C1..C5. The *meaning* of each id is\n    generic (\"the candidate shown as C1 in the state\", ...) because the real per-candidate detail\n    (window, region, deadline margin, estimated emissions) lives in the state text, which both the\n    decider and the benchmark's LLM baseline read. The feasible set is ordered so C1 is always the\n    immediate \"run now\" option when it is feasible.\n\nWiring (where it sits in the agent's path)\n    `CarbonShiftDecision.select(workload, feasible)` runs OUTSIDE the Strands tool loop, after the\n    scheduler builds the feasible set and before the agent explains the result:\n\n        feasible = scheduler.feasible(workload)\n        selection = CarbonShiftDecision(decider).select(workload, feasible)\n        # selection.candidate is validated; selection.verdict records how it was chosen\n\n    It records one entry per decider call on `self.log` (probabilities, verdict, decider_ms),\n    which agent/agent.py surfaces in chat()[\"decisions\"].\n\nMade once or made often\n    This decision is made on every schedule request, and a fleet schedules thousands of flexible\n    jobs a day, so it is a high-frequency decision - exactly where the decider's speed and cost\n    advantage over an LLM compounds (see submission/bench: same accuracy, ~4-5x faster, a fixed\n    fraction of a cent per 1,000 decisions). The same pattern also works for a one-off choice.\n\nHow to reuse it (the shape, in any domain)\n    The pattern is \"constrain in code, judge with the decider, validate in code\". To reuse it for\n    a different bounded choice (which vendor, which cache tier, which retry region, ...):\n\n        from decider_kit import Decider\n        # 1. your code produces a SMALL, bounded set of already-legal options, each rendered as\n        #    one line of prose with the facts the judgement needs (never the answer itself):\n        options = my_engine.feasible(request)                 # hard rules enforced here, in code\n        state = render(options)                               # the facts, as text\n        # 2. one typed choice question over stable ids, detail lives in the state:\n        q = {\"best\": Decider.choice(\"Which option best balances <your trade-off>?\",\n                                    {o.id: f\"the option shown as {o.id}\" for o in options})}\n        ans = Decider().ask(state, q)[\"best\"]\n        # 3. your code decides what to DO with the answer (thresholds you own):\n        chosen = by_id.get(ans.label)\n        final  = chosen if (chosen and ans.confidence >= THRESHOLD and revalidate(chosen))                  else safe_default(options)                   # fallback + flag for review\n\n    Keep the three invariants: (a) hard constraints and all arithmetic in code, never in the\n    model; (b) the decider classifies, your code acts; (c) the final choice is independently\n    re-validated and the model can never override a hard constraint. `CarbonShiftDecision` below\n    is this shape with carbon scheduling filled in; `select()` holds the thresholds you would tune.",
+ "questions_code": "QUESTIONS = {\n    \"best_candidate\": Decider.choice(\n        \"From the feasible candidates listed in the state, which one is the best schedule for this \"\n        \"workload? Prefer the lowest estimated carbon emissions while keeping a safe deadline \"\n        \"margin and respecting the workload's priority. Do not pick an option that cuts the \"\n        \"deadline margin thin for only a small carbon saving, especially for a high-priority \"\n        \"workload.\",\n        {cid: f\"choose the candidate shown as {cid} in the FEASIBLE CANDIDATES list\" for cid in CANDIDATE_IDS},\n    ),\n}",
+ "agent_md": "# Use case \u2014 CarbonShift AI\n\n**Schedule Smarter. Compute Cleaner.** \u2014 by Koodal AI Labs\n\n- **Pitch:** CarbonShift AI helps a cloud operator decide *when* and *where* a flexible workload\n  should run so that estimated carbon emissions drop while deadlines and operational commitments\n  are still met.\n- **Who it is for:** platform and SRE teams who run flexible batch, analytics, ETL, reporting and\n  ML-training jobs and want to cut the carbon of that compute without missing deadlines.\n- **Features:**\n  - a workload queue with runtime, power, deadline, priority and flexibility for each job;\n  - a deterministic scheduling engine that generates feasible execution windows across eligible\n    regions and enforces every hard constraint (deadline, capacity, eligibility, flexibility) in\n    code before anything is decided;\n  - per-candidate estimated energy (kWh) and emissions (kg CO2e) from a documented model;\n  - a carbon-aware candidate choice made by Strands Decider 2B, with a live decision panel in the\n    demo UI showing the feasible options, the excluded ones, the chosen candidate, its confidence\n    and its latency;\n  - low-confidence, invalid-choice and service-failure handling: a deterministic safe fallback\n    (lowest-emissions feasible candidate) plus an operator-review flag;\n  - an impact comparison against running now (baseline), with absolute and percentage carbon\n    avoided and the deadline margin;\n  - deployed on Amazon Bedrock AgentCore Runtime.\n- **The decision handed to Strands Decider 2B:** among the feasible schedule candidates (hard\n  constraints already enforced), which one best balances lower estimated carbon against a safe\n  deadline margin and the workload's priority? A `choice` over candidate ids. (`#tool-selection`)\n- **Why a decision model:** this is a judgement, not arithmetic. The literal lowest-emissions\n  option is a one-line `min()` in code; the real call is the trade-off between carbon saved and\n  deadline risk for a given priority, which reasonable operators weigh differently. The decider\n  returns a calibrated confidence the code branches on, fast and cheap, on every schedule.\n- **Amazon Bedrock:** the operator conversation and the plain-language explanation of the chosen\n  schedule, trade-offs and impact (Amazon Nova Pro by default).\n\n**Honesty note:** all workload and carbon-intensity data in `agent/data/` is synthetic and\nlabelled as such. Estimated emissions cover the workload's operational electricity only (energy x\ngrid carbon intensity); they are not AWS's whole footprint and not embodied or PUE-adjusted carbon.\nThe data-provider seam in `agent/data/` lets a real carbon-intensity source be added later.\n",
+ "llm_provider_local_runs": "ugmdu",
+ "agent_name": "CarbonShift AI",
+ "bench": {
+  "summary": {
+   "decider": {
+    "accuracy": 1.0,
+    "decisions": 13,
+    "per_question": {
+     "best_candidate": 1.0
+    },
+    "latency_p50_ms": 3277.9,
+    "latency_p95_ms": 3751.8,
+    "usd_per_1k_decisions": 0.035,
+    "confident_share": 0.0769,
+    "accuracy_when_confident": 1.0,
+    "sent_to_human_at_threshold": 12
+   },
+   "llm": {
+    "accuracy": 1.0,
+    "decisions": 13,
+    "per_question": {
+     "best_candidate": 1.0
+    },
+    "latency_p50_ms": 4905.9,
+    "latency_p95_ms": 14708.9,
+    "usd_per_1k_decisions": 0.0,
+    "confident_share": 1.0,
+    "accuracy_when_confident": 1.0,
+    "sent_to_human_at_threshold": 0
+   },
+   "speedup_p50": 1.5
+  },
+  "decider_model": "strands-decider-2b-hobson-v19",
+  "decider_mode": "ugmdu",
+  "llm_model": "qwen3.5-4b",
+  "cases": 13,
+  "split": "test",
+  "threshold": 0.7
+ },
+ "bench_table": "Decider: strands-decider-2b-hobson-v19 (ugmdu). 13 labelled cases, 13 decisions.\n\n| | Strands Decider 2B | qwen3.5-4b |\n|---|---|---|\n| Accuracy | 100.0% | 100.0% |\n| Latency p50 per decision | 3278 ms | 4906 ms |\n| Latency p95 | 3752 ms | 14709 ms |\n| Cost per 1,000 decisions | $0.0350 | $0.0000 |\n| Answered alone at confidence >= 0.7 | 8% | 100% |\n| Accuracy when confident | 100.0% | 100.0% |\n\nAt the median the decider was 1.5x faster than the LLM.\n",
+ "demo_turns": [
+  {
+   "user": "What workloads are waiting to be scheduled?",
+   "reply": "The following workloads are waiting to be scheduled:\n- Nightly revenue rollup (Analytics, normal priority, flexible, 14-hour deadline, 2-hour runtime)\n- Customer data ETL (Data processing, normal priority, flexible, 8-hour deadline, 3-hour runtime)\n- Hourly billing reconciliation (Batch, urgent priority, inflexible, 1-hour deadline, 0.5-hour runtime)\n- Recommendation model retrain (ML training, normal priority, flexible, 20-hour deadline, 6-hour runtime)\n- Compliance report generation (Report, high priority, flexible, 5-hour deadline, 2-hour runtime)\n- Cross-region backup verification (Batch, low priority, flexible, 24-hour deadline, 1.5-hour runtime)",
+   "decisions": [],
+   "latency_ms": 3285
+  },
+  {
+   "user": "Schedule W-ANALYTICS-01 for the lowest carbon while meeting its deadline.",
+   "reply": "The Nightly revenue rollup (W-ANALYTICS-01) will run in eu-west-1, starting in 6 hours, as per the decider's preferred candidate C3. This schedule avoids an estimated 3.64 kgCO2e (73.2%) compared to running it immediately in ap-south-1. The workload will finish 6 hours before the deadline, comfortably meeting it. No fallback was used, and the decision does not require operator review. The decider's confidence in this choice was 0.68, and it was independently revalidated to ensure all constraints were met.",
+   "decisions": [
+    {
+     "pattern": "#tool-selection",
+     "workload": "W-ANALYTICS-01",
+     "verdict": "decider",
+     "candidates": [
+      {
+       "id": "C1",
+       "kind": "run now",
+       "region": "ap-south-1",
+       "start_offset_hours": 0.0,
+       "finish_offset_hours": 2.0,
+       "deadline_margin_hours": 12.0,
+       "carbon_intensity": 0.71,
+       "emissions_kg": 4.97,
+       "feasible": true
+      },
+      {
+       "id": "C2",
+       "kind": "shift + move",
+       "region": "eu-west-1",
+       "start_offset_hours": 4.0,
+       "finish_offset_hours": 6.0,
+       "deadline_margin_hours": 8.0,
+       "carbon_intensity": 0.23,
+       "emissions_kg": 1.61,
+       "feasible": true
+      },
+      {
+       "id": "C3",
+       "kind": "shift + move",
+       "region": "eu-west-1",
+       "start_offset_hours": 6.0,
+       "finish_offset_hours": 8.0,
+       "deadline_margin_hours": 6.0,
+       "carbon_intensity": 0.19,
+       "emissions_kg": 1.33,
+       "feasible": true
+      },
+      {
+       "id": "C4",
+       "kind": "shift + move",
+       "region": "us-east-1",
+       "start_offset_hours": 6.0,
+       "finish_offset_hours": 8.0,
+       "deadline_margin_hours": 6.0,
+       "carbon_intensity": 0.3,
+       "emissions_kg": 2.1,
+       "feasible": true
+      },
+      {
+       "id": "C5",
+       "kind": "shift + move",
+       "region": "eu-west-1",
+       "start_offset_hours": 10.0,
+       "finish_offset_hours": 12.0,
+       "deadline_margin_hours": 2.0,
+       "carbon_intensity": 0.27,
+       "emissions_kg": 1.89,
+       "feasible": true
+      }
+     ],
+     "decider_preferred_id": "C3",
+     "final_selected_id": "C3",
+     "preferred_differs_from_final": false,
+     "confidence": 0.6836,
+     "probabilities": {
+      "C1": 0.0601,
+      "C2": 0.1595,
+      "C3": 0.6836,
+      "C4": 0.0446,
+      "C5": 0.0522
+     },
+     "decider_ms": 3897,
+     "validated": true,
+     "validation_note": "re-validated against hard constraints: finishes 6 h before the deadline, region eu-west-1 eligible, capacity ok",
+     "used_fallback": false,
+     "needs_review": false,
+     "reason": "Strands Decider 2B preferred C3 (confidence 0.68); accepted after re-validation",
+     "chosen_id": "C3",
+     "selected_id": "C3",
+     "selected_region": "eu-west-1",
+     "selected_start_offset_hours": 6.0,
+     "selected_emissions_kg": 1.33
+    }
+   ],
+   "latency_ms": 5837
+  },
+  {
+   "user": "Now schedule W-REPORT-05, it is high priority.",
+   "reply": "The application will run W-REPORT-05 in region eu-north-1, which matches the decider's preferred candidate C2. This decision avoids an estimated 1.05 kgCO2e (63.6% reduction) compared to running it now in eu-west-1. The workload finishes 3 hours before the deadline, meeting the deadline comfortably. No fallback was used, and the decision does not require operator review. The trade-off is a region change for lower emissions, with a safe deadline margin maintained.",
+   "decisions": [
+    {
+     "pattern": "#tool-selection",
+     "workload": "W-REPORT-05",
+     "verdict": "decider",
+     "candidates": [
+      {
+       "id": "C1",
+       "kind": "run now",
+       "region": "eu-west-1",
+       "start_offset_hours": 0.0,
+       "finish_offset_hours": 2.0,
+       "deadline_margin_hours": 3.0,
+       "carbon_intensity": 0.33,
+       "emissions_kg": 1.65,
+       "feasible": true
+      },
+      {
+       "id": "C2",
+       "kind": "move region",
+       "region": "eu-north-1",
+       "start_offset_hours": 0.0,
+       "finish_offset_hours": 2.0,
+       "deadline_margin_hours": 3.0,
+       "carbon_intensity": 0.12,
+       "emissions_kg": 0.6,
+       "feasible": true
+      }
+     ],
+     "decider_preferred_id": "C2",
+     "final_selected_id": "C2",
+     "preferred_differs_from_final": false,
+     "confidence": 0.7483,
+     "probabilities": {
+      "C1": 0.2517,
+      "C2": 0.7483
+     },
+     "decider_ms": 2225,
+     "validated": true,
+     "validation_note": "re-validated against hard constraints: finishes 3 h before the deadline, region eu-north-1 eligible, capacity ok",
+     "used_fallback": false,
+     "needs_review": false,
+     "reason": "Strands Decider 2B preferred C2 (confidence 0.75); accepted after re-validation",
+     "chosen_id": "C2",
+     "selected_id": "C2",
+     "selected_region": "eu-north-1",
+     "selected_start_offset_hours": 0.0,
+     "selected_emissions_kg": 0.6
+    }
+   ],
+   "latency_ms": 3805
+  },
+  {
+   "user": "Schedule the urgent billing reconciliation W-BILLING-03.",
+   "reply": "The application will run the urgent billing reconciliation W-BILLING-03 immediately in region us-east-1, which is the decider's preferred candidate. This schedule avoids 0 kgCO2e of emissions, as it is the only feasible option. The workload finishes 0.5 hours before the deadline, ensuring it meets the deadline comfortably. There are no trade-offs or uncertainties, and no fallback was used.",
+   "decisions": [
+    {
+     "pattern": "#tool-selection",
+     "workload": "W-BILLING-03",
+     "verdict": "only_option",
+     "candidates": [
+      {
+       "id": "C1",
+       "kind": "run now",
+       "region": "us-east-1",
+       "start_offset_hours": 0.0,
+       "finish_offset_hours": 0.5,
+       "deadline_margin_hours": 0.5,
+       "carbon_intensity": 0.42,
+       "emissions_kg": 0.42,
+       "feasible": true
+      }
+     ],
+     "decider_preferred_id": "C1",
+     "final_selected_id": "C1",
+     "preferred_differs_from_final": false,
+     "confidence": 1.0,
+     "probabilities": {},
+     "decider_ms": 0,
+     "validated": true,
+     "validation_note": "re-validated against hard constraints: finishes 0.5 h before the deadline, region us-east-1 eligible, capacity ok",
+     "used_fallback": false,
+     "needs_review": false,
+     "reason": "only one feasible candidate; no decision needed",
+     "chosen_id": "C1",
+     "selected_id": "C1",
+     "selected_region": "us-east-1",
+     "selected_start_offset_hours": 0.0,
+     "selected_emissions_kg": 0.42
+    }
+   ],
+   "latency_ms": 916
+  }
+ ],
+ "deployment": {
+  "runtime_arn": "arn:aws:bedrock-agentcore:us-east-1:575152933064:runtime/deciderkit_agent-V7Peo591uj",
+  "region": "us-east-1",
+  "deployed_at": 1792504282.656193,
+  "deploy_seconds": 79,
+  "decider_mode": "ugmdu",
+  "bedrock_model": "us.amazon.nova-pro-v1:0",
+  "eager": false,
+  "memories": {},
+  "gateways": {}
+ },
+ "repo_url": "",
+ "video_url": ""
+}

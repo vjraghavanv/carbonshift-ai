@@ -1,0 +1,80 @@
+[
+ {
+  "id": "W-ANALYTICS-01",
+  "name": "Nightly revenue rollup",
+  "type": "analytics",
+  "priority": "normal",
+  "flexible": true,
+  "deadline_hours": 14.0,
+  "runtime_hours": 2.0,
+  "avg_power_kw": 3.5,
+  "home_region": "ap-south-1",
+  "eligible_regions": ["ap-south-1", "eu-west-1", "us-east-1"],
+  "note": "Flexible batch analytics; can run any time before the morning report."
+ },
+ {
+  "id": "W-ETL-02",
+  "name": "Customer data ETL",
+  "type": "data-processing",
+  "priority": "normal",
+  "flexible": true,
+  "deadline_hours": 8.0,
+  "runtime_hours": 3.0,
+  "avg_power_kw": 5.0,
+  "home_region": "us-east-1",
+  "eligible_regions": ["us-east-1", "eu-west-1"],
+  "note": "Deadline-constrained ETL: only some later windows still finish in time."
+ },
+ {
+  "id": "W-BILLING-03",
+  "name": "Hourly billing reconciliation",
+  "type": "batch",
+  "priority": "urgent",
+  "flexible": false,
+  "deadline_hours": 1.0,
+  "runtime_hours": 0.5,
+  "avg_power_kw": 2.0,
+  "home_region": "us-east-1",
+  "eligible_regions": ["us-east-1"],
+  "note": "Urgent and not flexible: must run now, carbon cannot delay it."
+ },
+ {
+  "id": "W-ML-04",
+  "name": "Recommendation model retrain",
+  "type": "ml-training",
+  "priority": "normal",
+  "flexible": true,
+  "deadline_hours": 20.0,
+  "runtime_hours": 6.0,
+  "avg_power_kw": 12.0,
+  "home_region": "eu-west-1",
+  "eligible_regions": ["eu-west-1", "eu-north-1", "us-east-1"],
+  "note": "Large, flexible training job; big carbon swing between regions."
+ },
+ {
+  "id": "W-REPORT-05",
+  "name": "Compliance report generation",
+  "type": "report",
+  "priority": "high",
+  "flexible": true,
+  "deadline_hours": 5.0,
+  "runtime_hours": 2.0,
+  "avg_power_kw": 2.5,
+  "home_region": "eu-west-1",
+  "eligible_regions": ["eu-west-1", "eu-north-1"],
+  "note": "High priority with a tight-ish deadline: cleaner windows must keep a safe margin."
+ },
+ {
+  "id": "W-BACKUP-06",
+  "name": "Cross-region backup verification",
+  "type": "batch",
+  "priority": "low",
+  "flexible": true,
+  "deadline_hours": 24.0,
+  "runtime_hours": 1.5,
+  "avg_power_kw": 1.8,
+  "home_region": "us-east-1",
+  "eligible_regions": ["us-east-1", "eu-west-1", "eu-north-1", "ap-south-1"],
+  "note": "Low priority, very flexible: lots of room to chase the cleanest grid."
+ }
+]

@@ -1,0 +1,231 @@
+[
+ {
+  "start": 2.013861894607544,
+  "end": 15.605520963668823,
+  "out": {
+   "reply": "The following workloads are waiting to be scheduled:\n- Nightly revenue rollup (Analytics, normal priority, flexible, 14-hour deadline, 2-hour runtime)\n- Customer data ETL (Data processing, normal priority, flexible, 8-hour deadline, 3-hour runtime)\n- Hourly billing reconciliation (Batch, urgent priority, inflexible, 1-hour deadline, 0.5-hour runtime)\n- Recommendation model retrain (ML training, normal priority, flexible, 20-hour deadline, 6-hour runtime)\n- Compliance report generation (Report, high priority, flexible, 5-hour deadline, 2-hour runtime)\n- Cross-region backup verification (Batch, low priority, flexible, 24-hour deadline, 1.5-hour runtime)",
+   "decisions": [],
+   "model_id": "us.amazon.nova-pro-v1:0",
+   "latency_ms": 3285,
+   "agent": "CarbonShift AI",
+   "eager": false,
+   "served_by": "Amazon Bedrock AgentCore Runtime"
+  },
+  "say": "What workloads are waiting to be scheduled?",
+  "narrate": "The operator looks at the queue: flexible analytics, a deadline-constrained ETL, an urgent billing job and more."
+ },
+ {
+  "start": 15.605567932128906,
+  "end": 25.797930002212524,
+  "out": {
+   "reply": "The Nightly revenue rollup (W-ANALYTICS-01) will run in eu-west-1, starting in 6 hours, as per the decider's preferred candidate C3. This schedule avoids an estimated 3.64 kgCO2e (73.2%) compared to running it immediately in ap-south-1. The workload will finish 6 hours before the deadline, comfortably meeting it. No fallback was used, and the decision does not require operator review. The decider's confidence in this choice was 0.68, and it was independently revalidated to ensure all constraints were met.",
+   "decisions": [
+    {
+     "pattern": "#tool-selection",
+     "workload": "W-ANALYTICS-01",
+     "verdict": "decider",
+     "candidates": [
+      {
+       "id": "C1",
+       "kind": "run now",
+       "region": "ap-south-1",
+       "start_offset_hours": 0.0,
+       "finish_offset_hours": 2.0,
+       "deadline_margin_hours": 12.0,
+       "carbon_intensity": 0.71,
+       "emissions_kg": 4.97,
+       "feasible": true
+      },
+      {
+       "id": "C2",
+       "kind": "shift + move",
+       "region": "eu-west-1",
+       "start_offset_hours": 4.0,
+       "finish_offset_hours": 6.0,
+       "deadline_margin_hours": 8.0,
+       "carbon_intensity": 0.23,
+       "emissions_kg": 1.61,
+       "feasible": true
+      },
+      {
+       "id": "C3",
+       "kind": "shift + move",
+       "region": "eu-west-1",
+       "start_offset_hours": 6.0,
+       "finish_offset_hours": 8.0,
+       "deadline_margin_hours": 6.0,
+       "carbon_intensity": 0.19,
+       "emissions_kg": 1.33,
+       "feasible": true
+      },
+      {
+       "id": "C4",
+       "kind": "shift + move",
+       "region": "us-east-1",
+       "start_offset_hours": 6.0,
+       "finish_offset_hours": 8.0,
+       "deadline_margin_hours": 6.0,
+       "carbon_intensity": 0.3,
+       "emissions_kg": 2.1,
+       "feasible": true
+      },
+      {
+       "id": "C5",
+       "kind": "shift + move",
+       "region": "eu-west-1",
+       "start_offset_hours": 10.0,
+       "finish_offset_hours": 12.0,
+       "deadline_margin_hours": 2.0,
+       "carbon_intensity": 0.27,
+       "emissions_kg": 1.89,
+       "feasible": true
+      }
+     ],
+     "decider_preferred_id": "C3",
+     "final_selected_id": "C3",
+     "preferred_differs_from_final": false,
+     "confidence": 0.6836,
+     "probabilities": {
+      "C1": 0.0601,
+      "C2": 0.1595,
+      "C3": 0.6836,
+      "C4": 0.0446,
+      "C5": 0.0522
+     },
+     "decider_ms": 3897,
+     "validated": true,
+     "validation_note": "re-validated against hard constraints: finishes 6 h before the deadline, region eu-west-1 eligible, capacity ok",
+     "used_fallback": false,
+     "needs_review": false,
+     "reason": "Strands Decider 2B preferred C3 (confidence 0.68); accepted after re-validation",
+     "chosen_id": "C3",
+     "selected_id": "C3",
+     "selected_region": "eu-west-1",
+     "selected_start_offset_hours": 6.0,
+     "selected_emissions_kg": 1.33
+    }
+   ],
+   "model_id": "us.amazon.nova-pro-v1:0",
+   "latency_ms": 5837,
+   "agent": "CarbonShift AI",
+   "eager": false,
+   "served_by": "Amazon Bedrock AgentCore Runtime"
+  },
+  "say": "Schedule W-ANALYTICS-01 for the lowest carbon while meeting its deadline.",
+  "narrate": "A flexible analytics job with plenty of slack: cleaner windows and regions are open, so a real trade-off choice is made."
+ },
+ {
+  "start": 25.79793095588684,
+  "end": 33.16117000579834,
+  "out": {
+   "reply": "The application will run W-REPORT-05 in region eu-north-1, which matches the decider's preferred candidate C2. This decision avoids an estimated 1.05 kgCO2e (63.6% reduction) compared to running it now in eu-west-1. The workload finishes 3 hours before the deadline, meeting the deadline comfortably. No fallback was used, and the decision does not require operator review. The trade-off is a region change for lower emissions, with a safe deadline margin maintained.",
+   "decisions": [
+    {
+     "pattern": "#tool-selection",
+     "workload": "W-REPORT-05",
+     "verdict": "decider",
+     "candidates": [
+      {
+       "id": "C1",
+       "kind": "run now",
+       "region": "eu-west-1",
+       "start_offset_hours": 0.0,
+       "finish_offset_hours": 2.0,
+       "deadline_margin_hours": 3.0,
+       "carbon_intensity": 0.33,
+       "emissions_kg": 1.65,
+       "feasible": true
+      },
+      {
+       "id": "C2",
+       "kind": "move region",
+       "region": "eu-north-1",
+       "start_offset_hours": 0.0,
+       "finish_offset_hours": 2.0,
+       "deadline_margin_hours": 3.0,
+       "carbon_intensity": 0.12,
+       "emissions_kg": 0.6,
+       "feasible": true
+      }
+     ],
+     "decider_preferred_id": "C2",
+     "final_selected_id": "C2",
+     "preferred_differs_from_final": false,
+     "confidence": 0.7483,
+     "probabilities": {
+      "C1": 0.2517,
+      "C2": 0.7483
+     },
+     "decider_ms": 2225,
+     "validated": true,
+     "validation_note": "re-validated against hard constraints: finishes 3 h before the deadline, region eu-north-1 eligible, capacity ok",
+     "used_fallback": false,
+     "needs_review": false,
+     "reason": "Strands Decider 2B preferred C2 (confidence 0.75); accepted after re-validation",
+     "chosen_id": "C2",
+     "selected_id": "C2",
+     "selected_region": "eu-north-1",
+     "selected_start_offset_hours": 0.0,
+     "selected_emissions_kg": 0.6
+    }
+   ],
+   "model_id": "us.amazon.nova-pro-v1:0",
+   "latency_ms": 3805,
+   "agent": "CarbonShift AI",
+   "eager": false,
+   "served_by": "Amazon Bedrock AgentCore Runtime"
+  },
+  "say": "Now schedule W-REPORT-05, it is high priority.",
+  "narrate": "A high-priority report with a tighter deadline: the greenest option must still keep a safe margin."
+ },
+ {
+  "start": 33.16119599342346,
+  "end": 37.89803695678711,
+  "out": {
+   "reply": "The application will run the urgent billing reconciliation W-BILLING-03 immediately in region us-east-1, which is the decider's preferred candidate. This schedule avoids 0 kgCO2e of emissions, as it is the only feasible option. The workload finishes 0.5 hours before the deadline, ensuring it meets the deadline comfortably. There are no trade-offs or uncertainties, and no fallback was used.",
+   "decisions": [
+    {
+     "pattern": "#tool-selection",
+     "workload": "W-BILLING-03",
+     "verdict": "only_option",
+     "candidates": [
+      {
+       "id": "C1",
+       "kind": "run now",
+       "region": "us-east-1",
+       "start_offset_hours": 0.0,
+       "finish_offset_hours": 0.5,
+       "deadline_margin_hours": 0.5,
+       "carbon_intensity": 0.42,
+       "emissions_kg": 0.42,
+       "feasible": true
+      }
+     ],
+     "decider_preferred_id": "C1",
+     "final_selected_id": "C1",
+     "preferred_differs_from_final": false,
+     "confidence": 1.0,
+     "probabilities": {},
+     "decider_ms": 0,
+     "validated": true,
+     "validation_note": "re-validated against hard constraints: finishes 0.5 h before the deadline, region us-east-1 eligible, capacity ok",
+     "used_fallback": false,
+     "needs_review": false,
+     "reason": "only one feasible candidate; no decision needed",
+     "chosen_id": "C1",
+     "selected_id": "C1",
+     "selected_region": "us-east-1",
+     "selected_start_offset_hours": 0.0,
+     "selected_emissions_kg": 0.42
+    }
+   ],
+   "model_id": "us.amazon.nova-pro-v1:0",
+   "latency_ms": 916,
+   "agent": "CarbonShift AI",
+   "eager": false,
+   "served_by": "Amazon Bedrock AgentCore Runtime"
+  },
+  "say": "Schedule the urgent billing reconciliation W-BILLING-03.",
+  "narrate": "Urgent and not flexible: only an immediate run is feasible, so carbon cannot delay it."
+ }
+]

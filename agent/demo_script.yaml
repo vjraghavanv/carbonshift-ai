@@ -1,0 +1,27 @@
+# What the demo video shows. Each turn is typed into the demo UI against your real agent.
+# `narrate` describes the situation only; make_video.py appends what the decider actually decided,
+# so the narration never claims something that did not happen. Keep it under about 2.5 minutes.
+title: "CarbonShift AI: schedule smarter, compute cleaner"
+pitch: "CarbonShift AI decides when and where a flexible cloud workload should run to cut estimated carbon, without missing deadlines."
+# (no digits allowed in pitch/intro/intro_normal/outro: the video adds the measured numbers itself)
+features:
+  - "a workload queue with deadline, priority and flexibility for each job"
+  - "a deterministic engine that enforces hard constraints and estimates energy and emissions"
+  - "a carbon-aware candidate choice made by Strands Decider 2B, with live confidence and latency"
+  - "a safe fallback and an operator-review flag when the decision is low-confidence"
+  - "runs on Amazon Bedrock AgentCore Runtime"
+# eager: true makes the agent commit to a schedule without asking first, so the decision is
+# visible on camera. The intro says so.
+eager: true
+intro: "CarbonShift AI talks through Amazon Bedrock. For this demo it schedules each named workload right away, and Strands Decider chooses the best execution window and region among the feasible candidates."
+intro_normal: "CarbonShift AI runs on Amazon Bedrock AgentCore Runtime and talks through Amazon Bedrock. Strands Decider chooses the best execution window and region among the feasible candidates for each workload."
+turns:
+  - say: "What workloads are waiting to be scheduled?"
+    narrate: "The operator looks at the queue: flexible analytics, a deadline-constrained ETL, an urgent billing job and more."
+  - say: "Schedule W-ANALYTICS-01 for the lowest carbon while meeting its deadline."
+    narrate: "A flexible analytics job with plenty of slack: cleaner windows and regions are open, so a real trade-off choice is made."
+  - say: "Now schedule W-REPORT-05, it is high priority."
+    narrate: "A high-priority report with a tighter deadline: the greenest option must still keep a safe margin."
+  - say: "Schedule the urgent billing reconciliation W-BILLING-03."
+    narrate: "Urgent and not flexible: only an immediate run is feasible, so carbon cannot delay it."
+outro: "Hard constraints in code, a calibrated carbon-vs-deadline choice from Strands Decider in one forward pass, and Amazon Bedrock for the explanation."

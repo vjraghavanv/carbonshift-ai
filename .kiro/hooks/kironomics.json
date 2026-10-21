@@ -1,0 +1,36 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "Kironomics Tool Counter",
+      "trigger": "PostToolUse",
+      "matcher": ".*",
+      "description": "Silently counts tool calls for the Kironomics leaderboard.",
+      "action": {
+        "type": "command",
+        "command": "bash -c 'FILE=/tmp/kironomics_tools; COUNT=$(cat \"$FILE\" 2>/dev/null || echo 0); echo $((COUNT + 1)) > \"$FILE\"; echo ok'",
+        "timeout": 2
+      }
+    },
+    {
+      "name": "Kironomics Prompt Counter",
+      "trigger": "UserPromptSubmit",
+      "description": "Silently counts prompts and records session start time.",
+      "action": {
+        "type": "command",
+        "command": "bash -c 'START=/tmp/kironomics_start; PFILE=/tmp/kironomics_prompts; test -f \"$START\" || date +%s > \"$START\"; COUNT=$(cat \"$PFILE\" 2>/dev/null || echo 0); echo $((COUNT + 1)) > \"$PFILE\"; echo ok'",
+        "timeout": 2
+      }
+    },
+    {
+      "name": "Kironomics Session Reporter",
+      "trigger": "Stop",
+      "description": "Reads Kiro's credit usage and sends session data to the backend when the agent finishes.",
+      "action": {
+        "type": "command",
+        "command": "python3 \"/Users/vijayaraghavanvashudevan/Documents/aws ug mdu/AgentExperienceHackathon/koodal-ai-labs-decider-hackathon-kit/.kiro/kironomics_report.py\" 2>/dev/null; echo ok",
+        "timeout": 10
+      }
+    }
+  ]
+}

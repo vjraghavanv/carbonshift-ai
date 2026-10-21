@@ -1,0 +1,328 @@
+{
+ "decider_model": "strands-decider-2b-hobson-v19",
+ "rows": [
+  {
+   "i": 0,
+   "expected": {
+    "best_candidate": "C3"
+   },
+   "decider": {
+    "best_candidate": {
+     "label": "C3",
+     "confidence": 0.5293
+    }
+   },
+   "decider_ms": 3860.827542026527,
+   "decider_server_ms": 3278.7,
+   "llm": {
+    "best_candidate": {
+     "label": "C3",
+     "confidence": 0.95
+    }
+   },
+   "llm_ms": 5194.730999995954,
+   "llm_cost": 0.0
+  },
+  {
+   "i": 1,
+   "expected": {
+    "best_candidate": "C3"
+   },
+   "decider": {
+    "best_candidate": {
+     "label": "C3",
+     "confidence": 0.5893
+    }
+   },
+   "decider_ms": 3044.3376249750145,
+   "decider_server_ms": 2470.0,
+   "llm": {
+    "best_candidate": {
+     "label": "C3",
+     "confidence": 0.9
+    }
+   },
+   "llm_ms": 4908.430750016123,
+   "llm_cost": 0.0
+  },
+  {
+   "i": 2,
+   "expected": {
+    "best_candidate": "C4"
+   },
+   "decider": {
+    "best_candidate": {
+     "label": "C4",
+     "confidence": 0.4797
+    }
+   },
+   "decider_ms": 3277.866999967955,
+   "decider_server_ms": 2776.2,
+   "llm": {
+    "best_candidate": {
+     "label": "C4",
+     "confidence": 0.9
+    }
+   },
+   "llm_ms": 4884.468082978856,
+   "llm_cost": 0.0
+  },
+  {
+   "i": 3,
+   "expected": {
+    "best_candidate": "C3"
+   },
+   "decider": {
+    "best_candidate": {
+     "label": "C3",
+     "confidence": 0.516
+    }
+   },
+   "decider_ms": 3206.7249169922434,
+   "decider_server_ms": 2729.5,
+   "llm": {
+    "best_candidate": {
+     "label": "C3",
+     "confidence": 0.9
+    }
+   },
+   "llm_ms": 4875.312332995236,
+   "llm_cost": 0.0
+  },
+  {
+   "i": 4,
+   "expected": {
+    "best_candidate": "C2"
+   },
+   "decider": {
+    "best_candidate": {
+     "label": "C2",
+     "confidence": 0.7275
+    }
+   },
+   "decider_ms": 3093.296459002886,
+   "decider_server_ms": 2611.2,
+   "llm": {
+    "best_candidate": {
+     "label": "C2",
+     "confidence": 0.9
+    }
+   },
+   "llm_ms": 4892.727083002683,
+   "llm_cost": 0.0
+  },
+  {
+   "i": 5,
+   "expected": {
+    "best_candidate": "C3"
+   },
+   "decider": {
+    "best_candidate": {
+     "label": "C3",
+     "confidence": 0.4374
+    }
+   },
+   "decider_ms": 3392.8530409466475,
+   "decider_server_ms": 2368.3,
+   "llm": {
+    "best_candidate": {
+     "label": "C3",
+     "confidence": 0.9
+    }
+   },
+   "llm_ms": 4852.389791980386,
+   "llm_cost": 0.0
+  },
+  {
+   "i": 6,
+   "expected": {
+    "best_candidate": "C3"
+   },
+   "decider": {
+    "best_candidate": {
+     "label": "C3",
+     "confidence": 0.4823
+    }
+   },
+   "decider_ms": 2912.9654159769416,
+   "decider_server_ms": 2450.0,
+   "llm": {
+    "best_candidate": {
+     "label": "C3",
+     "confidence": 0.9
+    }
+   },
+   "llm_ms": 4966.333875025157,
+   "llm_cost": 0.0
+  },
+  {
+   "i": 7,
+   "expected": {
+    "best_candidate": "C3"
+   },
+   "decider": {
+    "best_candidate": {
+     "label": "C3",
+     "confidence": 0.6436
+    }
+   },
+   "decider_ms": 3299.0807500318624,
+   "decider_server_ms": 2827.4,
+   "llm": {
+    "best_candidate": {
+     "label": "C3",
+     "confidence": 0.9
+    }
+   },
+   "llm_ms": 14880.236625031102,
+   "llm_cost": 0.0
+  },
+  {
+   "i": 8,
+   "expected": {
+    "best_candidate": "C2"
+   },
+   "decider": {
+    "best_candidate": {
+     "label": "C2",
+     "confidence": 0.6917
+    }
+   },
+   "decider_ms": 3294.0432080067694,
+   "decider_server_ms": 2823.0,
+   "llm": {
+    "best_candidate": {
+     "label": "C2",
+     "confidence": 0.9
+    }
+   },
+   "llm_ms": 4905.923625046853,
+   "llm_cost": 0.0
+  },
+  {
+   "i": 9,
+   "expected": {
+    "best_candidate": "C3"
+   },
+   "decider": {
+    "best_candidate": {
+     "label": "C3",
+     "confidence": 0.4627
+    }
+   },
+   "decider_ms": 2917.894874990452,
+   "decider_server_ms": 2447.1,
+   "llm": {
+    "best_candidate": {
+     "label": "C3",
+     "confidence": 0.9
+    }
+   },
+   "llm_ms": 4905.682541022543,
+   "llm_cost": 0.0
+  },
+  {
+   "i": 10,
+   "expected": {
+    "best_candidate": "C3"
+   },
+   "decider": {
+    "best_candidate": {
+     "label": "C3",
+     "confidence": 0.4807
+    }
+   },
+   "decider_ms": 3751.771082985215,
+   "decider_server_ms": 3253.1,
+   "llm": {
+    "best_candidate": {
+     "label": "C3",
+     "confidence": 0.9
+    }
+   },
+   "llm_ms": 4878.3209999674,
+   "llm_cost": 0.0
+  },
+  {
+   "i": 11,
+   "expected": {
+    "best_candidate": "C3"
+   },
+   "decider": {
+    "best_candidate": {
+     "label": "C3",
+     "confidence": 0.566
+    }
+   },
+   "decider_ms": 3010.0480419932865,
+   "decider_server_ms": 2486.8,
+   "llm": {
+    "best_candidate": {
+     "label": "C3",
+     "confidence": 0.9
+    }
+   },
+   "llm_ms": 4927.7810829808,
+   "llm_cost": 0.0
+  },
+  {
+   "i": 12,
+   "expected": {
+    "best_candidate": "C3"
+   },
+   "decider": {
+    "best_candidate": {
+     "label": "C3",
+     "confidence": 0.5131
+    }
+   },
+   "decider_ms": 3299.19599997811,
+   "decider_server_ms": 2828.3,
+   "llm": {
+    "best_candidate": {
+     "label": "C3",
+     "confidence": 0.9
+    }
+   },
+   "llm_ms": 14708.882457984146,
+   "llm_cost": 0.0
+  }
+ ],
+ "summary": {
+  "decider": {
+   "accuracy": 1.0,
+   "decisions": 13,
+   "per_question": {
+    "best_candidate": 1.0
+   },
+   "latency_p50_ms": 3277.9,
+   "latency_p95_ms": 3751.8,
+   "usd_per_1k_decisions": 0.035,
+   "confident_share": 0.0769,
+   "accuracy_when_confident": 1.0,
+   "sent_to_human_at_threshold": 12
+  },
+  "llm": {
+   "accuracy": 1.0,
+   "decisions": 13,
+   "per_question": {
+    "best_candidate": 1.0
+   },
+   "latency_p50_ms": 4905.9,
+   "latency_p95_ms": 14708.9,
+   "usd_per_1k_decisions": 0.0,
+   "confident_share": 1.0,
+   "accuracy_when_confident": 1.0,
+   "sent_to_human_at_threshold": 0
+  },
+  "speedup_p50": 1.5
+ },
+ "threshold": 0.7,
+ "llm_model": "qwen3.5-4b",
+ "llm_provider": "ugmdu",
+ "llm_where": "AWS User Group Madurai cloud (qwen3.5-4b)",
+ "decider_url": "https://da25tnxy06gjk.cloudfront.net",
+ "decider_mode": "ugmdu",
+ "ran_at": 1792506176.921036,
+ "split": "test"
+}

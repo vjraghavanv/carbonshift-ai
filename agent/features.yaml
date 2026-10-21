@@ -1,0 +1,22 @@
+# Amazon Bedrock AgentCore features for CarbonShift AI. `./kit deploy` adds what is enabled to
+# deploy/agentcore/agentcore.json and deploys it with the runtime.
+#
+# Decision for this submission: deploy on AgentCore Runtime alone (Runtime already puts the agent
+# on AWS with Amazon Bedrock). Memory and Gateway are off; the carbon-aware decision pattern is
+# #tool-selection realised as a choice over candidates generated in code, so neither feature is
+# needed to demonstrate it. Turn one on later if you add cross-session memory or external tools.
+
+memory:
+  enabled: false
+  name: carbonshiftmemory
+  strategies: [SEMANTIC, USER_PREFERENCE]
+  expiry_days: 30
+
+gateway:
+  enabled: false
+  name: tools
+  authorizer: AWS_IAM
+  targets:
+    - name: websearch
+      type: connector
+      connector: web-search

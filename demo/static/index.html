@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Decider agent demo</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+  :root { --bg:#0B1020; --panel:#121A2E; --line:#223052; --ink:#E7ECF6; --mute:#8D9AB5; --orange:#FF9900; --green:#34D399; --red:#F87171; --amber:#FBBF24; --blue:#60A5FA; }
+  * { box-sizing:border-box; } body { margin:0; background:var(--bg); color:var(--ink); font:15px Inter, system-ui, sans-serif; }
+  header { display:flex; align-items:center; gap:14px; padding:14px 22px; border-bottom:1px solid var(--line); }
+  header .dot { width:10px; height:10px; border-radius:50%; background:var(--orange); box-shadow:0 0 12px var(--orange); }
+  header h1 { font-size:18px; margin:0; } header .meta { color:var(--mute); font-size:13px; margin-left:auto; }
+  main { display:grid; grid-template-columns:1.1fr 1fr; gap:18px; padding:18px 22px; height:calc(100vh - 60px); }
+  .card { background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:16px; display:flex; flex-direction:column; min-height:0; }
+  .card h2 { margin:0 0 10px; font-size:14px; color:var(--mute); text-transform:uppercase; letter-spacing:.08em; }
+  #log { flex:1; overflow:auto; display:flex; flex-direction:column; gap:10px; }
+  .msg { padding:10px 13px; border-radius:12px; max-width:88%; line-height:1.45; white-space:pre-wrap; }
+  .user { align-self:flex-end; background:#1E2A47; } .bot { align-self:flex-start; background:#18243B; border:1px solid var(--line); }
+  .bot .t { color:var(--mute); font-size:12px; margin-top:6px; }
+  form { display:flex; gap:10px; margin-top:12px; } input { flex:1; background:#0F1628; color:var(--ink); border:1px solid var(--line); border-radius:10px; padding:12px; font:inherit; }
+  button { background:var(--orange); color:#111; border:0; border-radius:10px; padding:0 18px; font-weight:700; cursor:pointer; }
+  #dec { flex:1; overflow:auto; display:flex; flex-direction:column; gap:12px; }
+  .d { border:1px solid var(--line); border-radius:12px; padding:12px; background:#0F1628; animation:pop .35s ease; }
+  @keyframes pop { from { transform:scale(.97); opacity:.2; } to { transform:none; opacity:1; } }
+  .d .head { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; font-weight:700; }
+  .tag { font:12px 'JetBrains Mono', monospace; padding:2px 9px; border-radius:99px; border:1px solid var(--line); }
+  .proceed { color:var(--green); border-color:var(--green); } .guide, .review { color:var(--amber); border-color:var(--amber); }
+  .deny, .block { color:var(--red); border-color:var(--red); } .confirm { color:var(--blue); border-color:var(--blue); }
+  .row { display:grid; grid-template-columns:150px 1fr 54px; gap:10px; align-items:center; font:13px 'JetBrains Mono', monospace; margin:5px 0; }
+  .bar { height:10px; background:#1B2540; border-radius:99px; overflow:hidden; } .bar i { display:block; height:100%; border-radius:99px; }
+  .kv { color:var(--mute); font:12px 'JetBrains Mono', monospace; margin-top:6px; word-break:break-all; }
+  .empty { color:var(--mute); } .credit { color:var(--mute); font-size:12px; margin-top:8px; }
+  .clip { display:flex; align-items:center; padding:0 12px; border:1px solid var(--line); border-radius:10px; cursor:pointer; font-size:18px; }
+  .att { display:flex; gap:8px; margin-top:10px; } .att img, .msg img { height:64px; border-radius:8px; border:1px solid var(--line); }
+  .msg img { height:120px; display:block; margin-bottom:6px; }
+  /* CarbonShift candidate panel */
+  .conf { font:12px 'JetBrains Mono', monospace; color:var(--mute); margin:2px 0 10px; }
+  table.cands { width:100%; border-collapse:collapse; font:12px 'JetBrains Mono', monospace; margin-bottom:10px; }
+  table.cands th { text-align:left; color:var(--mute); font-weight:500; padding:3px 6px; border-bottom:1px solid var(--line); }
+  table.cands td { padding:4px 6px; border-bottom:1px solid #16203a; }
+  table.cands tr.rowFinal { background:rgba(52,211,153,.08); }
+  td.cid { white-space:nowrap; } td.ok { color:var(--green); } td.warn { color:var(--amber); }
+  .mk { font-size:10px; padding:1px 5px; border-radius:99px; margin-left:4px; vertical-align:middle; }
+  .mk.pref { border:1px solid var(--blue); color:var(--blue); }
+  .mk.final { border:1px solid var(--green); color:var(--green); }
+  .minibar { display:inline-block; width:40px; height:7px; background:#1B2540; border-radius:99px; overflow:hidden; margin-right:5px; vertical-align:middle; }
+  .minibar i { display:block; height:100%; background:var(--orange); }
+  td.prob { white-space:nowrap; color:var(--mute); }
+  .pick, .val, .why { font:12px/1.4 Inter, sans-serif; padding:7px 9px; border-radius:8px; margin-top:7px; }
+  .pick.okpick { background:rgba(52,211,153,.10); color:var(--ink); }
+  .pick.warnpick { background:rgba(251,191,36,.12); color:var(--ink); border:1px solid var(--amber); }
+  .val.ok, .why.ok { color:var(--green); } .val.warn, .why.warn { color:var(--amber); }
+  /* benchmark view */
+  .tabs { display:flex; gap:8px; margin-bottom:10px; }
+  .tab { background:transparent; color:var(--mute); border:1px solid var(--line); border-radius:8px; padding:5px 11px; font:12px Inter, sans-serif; font-weight:600; }
+  .tab.on { background:var(--orange); color:#111; border-color:var(--orange); }
+  #bench { flex:1; overflow:auto; }
+  .bmetrics { display:grid; grid-template-columns:repeat(2,1fr); gap:8px; margin-bottom:12px; }
+  .metric { background:#0F1628; border:1px solid var(--line); border-radius:10px; padding:9px 11px; }
+  .metric .lab { color:var(--mute); font-size:11px; text-transform:uppercase; letter-spacing:.06em; }
+  .metric .big { font:18px 'JetBrains Mono', monospace; margin-top:3px; } .metric .big b { color:var(--orange); }
+  .bnote { font:12px/1.5 Inter, sans-serif; color:var(--mute); background:rgba(96,165,250,.08); border:1px solid var(--line); border-radius:8px; padding:8px 10px; margin-bottom:12px; }
+  table.bench { width:100%; border-collapse:collapse; font:12px 'JetBrains Mono', monospace; }
+  table.bench th { text-align:left; color:var(--mute); font-weight:500; padding:4px 6px; border-bottom:1px solid var(--line); position:sticky; top:0; background:var(--panel); }
+  table.bench td { padding:4px 6px; border-bottom:1px solid #16203a; }
+  .ok2 { color:var(--green); } .bad2 { color:var(--red); }
+</style>
+</head>
+<body>
+<header><span class="dot"></span><h1 id="name">Decider agent</h1><span class="meta" id="meta"></span></header>
+<main>
+  <section class="card"><h2>Conversation</h2><div id="log"></div>
+    <div id="att" class="att"></div>
+    <form id="f"><label class="clip" title="Attach a photo">&#128206;<input id="img" type="file" accept="image/*" multiple hidden></label><input id="m" placeholder="Type a message" autocomplete="off"><button>Send</button></form></section>
+  <section class="card">
+    <div class="tabs"><button id="tabLive" class="tab on">Live decisions</button><button id="tabBench" class="tab">Benchmark (real test cases)</button></div>
+    <div id="dec"><p class="empty">Decisions appear here as the agent makes them.</p></div>
+    <div id="bench" style="display:none"><p class="empty">Loading the benchmark...</p></div>
+    <div class="credit">Built with the AWS User Group Madurai Strands Decider hackathon kit</div></section>
+</main>
+<script>
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const log = document.getElementById("log"), dec = document.getElementById("dec");
+fetch("/api/info").then(r => r.json()).then(i => { document.getElementById("name").textContent = i.agent;
+  document.getElementById("meta").textContent = `LLM: ${i.llm} · Decider: ${i.decider} · ${i.target === "agentcore" ? "on AgentCore Runtime" : "local agent"}`; });
+function add(cls, html) { const d = document.createElement("div"); d.className = "msg " + cls; d.innerHTML = html; log.appendChild(d); log.scrollTop = 1e9; return d; }
+function decision(rec) {
+  if (dec.querySelector(".empty")) dec.innerHTML = "";
+  // CarbonShift AI records carry a `candidates` array: render the scheduling-specific panel.
+  if (Array.isArray(rec.candidates)) { dec.prepend(carbonDecision(rec)); return; }
+  const verdict = rec.verdict || rec.action || rec.tier || "";
+  const title = rec.tool ? `before ${rec.tool}` : (rec.stage || rec.pattern || "decision");
+  const probs = Object.entries(rec).filter(([k, v]) => typeof v === "number" && v >= 0 && v <= 1 && !k.endsWith("_ms"));
+  const rest = Object.entries(rec).filter(([k, v]) => !(typeof v === "number" && v >= 0 && v <= 1) && !["verdict", "action", "tool", "stage", "pattern"].includes(k));
+  const color = (v) => v >= 0.5 ? "#34D399" : "#F87171";
+  const el = document.createElement("div"); el.className = "d";
+  el.innerHTML = `<div class="head"><span>${esc(title)} <span class="tag">${esc(rec.pattern || "")}</span></span><span class="tag ${esc(verdict)}">${esc(verdict)}</span></div>` +
+    probs.map(([k, v]) => `<div class="row"><span>${esc(k)}</span><span class="bar"><i style="width:${v * 100}%;background:${color(v)}"></i></span><span>${v.toFixed(2)}</span></div>`).join("") +
+    `<div class="kv">${rest.map(([k, v]) => `${esc(k)}: ${esc(typeof v === "object" ? JSON.stringify(v) : v)}`).join(" · ")}</div>`;
+  dec.prepend(el);
+}
+
+// CarbonShift AI: show every candidate, the Decider's PREFERRED choice, the application's FINAL
+// selection (separately when a fallback was used), the independent validation and the reason.
+function carbonDecision(rec) {
+  const el = document.createElement("div"); el.className = "d";
+  const verdict = rec.verdict || "";
+  const preferred = rec.decider_preferred_id, final = rec.final_selected_id;
+  const probs = rec.probabilities || {};
+  const confidentColor = rec.confidence >= 0.6 ? "var(--green)" : "var(--amber)";
+  // candidate table
+  const rows = rec.candidates.map((c) => {
+    const isPref = c.id === preferred, isFinal = c.id === final;
+    const marks = (isPref ? '<span class="mk pref" title="Decider preferred">DECIDER</span>' : "") +
+                  (isFinal ? '<span class="mk final" title="Final selected schedule">FINAL</span>' : "");
+    const p = probs[c.id];
+    const bar = p != null ? `<span class="minibar"><i style="width:${Math.round(p*100)}%"></i></span>${p.toFixed(2)}` : "-";
+    return `<tr class="${isFinal ? 'rowFinal' : ''}">
+      <td class="cid">${esc(c.id)} ${marks}</td>
+      <td>${esc(c.kind)}</td><td>${esc(c.region)}</td>
+      <td>+${c.start_offset_hours}h</td>
+      <td class="${c.deadline_margin_hours >= 1 ? 'ok' : 'warn'}">${c.deadline_margin_hours}h</td>
+      <td>${c.emissions_kg} kg</td>
+      <td class="prob">${bar}</td></tr>`;
+  }).join("");
+  const differ = rec.preferred_differs_from_final;
+  const chooseLine = differ
+    ? `<div class="pick warnpick"><b>Decider preferred ${esc(preferred)}</b>, but the application ran <b>${esc(final)}</b> (deterministic fallback).</div>`
+    : `<div class="pick okpick">Decider preferred <b>${esc(preferred ?? "n/a")}</b>; the application ran the same candidate <b>${esc(final)}</b>.</div>`;
+  const val = rec.validated
+    ? `<div class="val ok">✓ independent re-validation passed — ${esc(rec.validation_note)}</div>`
+    : `<div class="val warn">⚠ ${esc(rec.validation_note || "not validated")}</div>`;
+  const fb = rec.used_fallback
+    ? `<div class="why warn">Fallback used · needs operator review: ${esc(rec.reason)}</div>`
+    : `<div class="why ok">${esc(rec.reason)}</div>`;
+  el.innerHTML =
+    `<div class="head"><span>schedule ${esc(rec.workload || "")} <span class="tag">${esc(rec.pattern || "")}</span></span>` +
+      `<span class="tag ${esc(verdict)}">${esc(verdict)}</span></div>` +
+    `<div class="conf">Decider confidence <b style="color:${confidentColor}">${(rec.confidence||0).toFixed(2)}</b>` +
+      ` · ${rec.decider_ms||0} ms</div>` +
+    `<table class="cands"><thead><tr><th>cand</th><th>kind</th><th>region</th><th>start</th><th>margin</th><th>est CO₂e</th><th>P</th></tr></thead>` +
+      `<tbody>${rows}</tbody></table>` +
+    chooseLine + val + fb;
+  return el;
+}
+let pending = [];  // attached photos as data URLs, sent with the next message
+const att = document.getElementById("att");
+document.getElementById("img").addEventListener("change", async (e) => {
+  for (const f of e.target.files) pending.push(await new Promise((ok) => { const r = new FileReader(); r.onload = () => ok(r.result); r.readAsDataURL(f); }));
+  att.innerHTML = pending.map((u) => `<img src="${u}" alt="attached photo">`).join(""); e.target.value = "";
+});
+document.getElementById("f").addEventListener("submit", async (e) => {
+  e.preventDefault(); const m = document.getElementById("m"); const text = m.value.trim(); if (!text && !pending.length) return; m.value = "";
+  const images = pending; pending = []; att.innerHTML = "";
+  add("user", images.map((u) => `<img src="${u}" alt="photo">`).join("") + esc(text)); const wait = add("bot", "<span class='t'>thinking...</span>");
+  const r = await fetch("/api/chat", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ message: text || "(photo)", images }) });
+  const out = await r.json();
+  if (out.error) { wait.innerHTML = `<span style="color:#F87171">${esc(out.error)}</span>`; return; }
+  (out.decisions || []).forEach(decision);
+  const n = (out.decisions || []).length;
+  wait.innerHTML = esc(out.reply) + `<div class="t">${out.latency_ms} ms · ${n} decision${n === 1 ? "" : "s"}${out.served_by ? " · " + esc(out.served_by) : ""}</div>`;
+  document.body.dataset.turns = (+(document.body.dataset.turns || 0) + 1);
+});
+
+// ---- Benchmark view: the real held-out test cases and the decider-vs-LLM result ----
+const benchEl = document.getElementById("bench"), decEl = document.getElementById("dec");
+const tabLive = document.getElementById("tabLive"), tabBench = document.getElementById("tabBench");
+let benchLoaded = false;
+tabLive.addEventListener("click", () => { tabLive.classList.add("on"); tabBench.classList.remove("on"); decEl.style.display = ""; benchEl.style.display = "none"; });
+tabBench.addEventListener("click", () => { tabBench.classList.add("on"); tabLive.classList.remove("on"); decEl.style.display = "none"; benchEl.style.display = ""; if (!benchLoaded) loadBench(); });
+
+async function loadBench() {
+  benchLoaded = true;
+  let b; try { b = await (await fetch("/api/bench")).json(); } catch (e) { benchEl.innerHTML = `<p class="empty">Could not load benchmark.</p>`; return; }
+  if (!b.available) { benchEl.innerHTML = `<p class="empty">No benchmark yet. Run <code>./kit bench --split test</code> to generate it.</p>`; return; }
+  const s = b.summary || {}, d = s.decider || {}, l = s.llm || {};
+  const pct = (x) => x == null ? "-" : (x * 100).toFixed(0) + "%";
+  const ms = (x) => x == null ? "-" : Math.round(x) + " ms";
+  const correct = b.rows.filter((r) => r.correct).length;
+  const metrics = [
+    ["Accuracy (Decider)", `<b>${pct(d.accuracy)}</b> on ${b.rows.length} held-out cases`],
+    ["Accuracy (LLM baseline)", pct(l.accuracy)],
+    ["Latency p50 · p95 (Decider)", `${ms(d.latency_p50_ms)} · ${ms(d.latency_p95_ms)}`],
+    ["Latency p50 · p95 (LLM)", `${ms(l.latency_p50_ms)} · ${ms(l.latency_p95_ms)}`],
+    ["Cost / 1,000 decisions", `$${(d.usd_per_1k_decisions ?? 0).toFixed(3)} vs $${(l.usd_per_1k_decisions ?? 0).toFixed(3)}`],
+    ["Operating threshold", `${b.operating_threshold} (below this → safe fallback + review)`],
+  ];
+  const rows = b.rows.map((r, i) => `<tr>
+    <td>#${i + 1}</td><td>${esc(r.expected)}</td>
+    <td class="${r.correct ? "ok2" : "bad2"}">${esc(r.decider)} ${r.correct ? "✓" : "✗"}</td>
+    <td>${(r.confidence ?? 0).toFixed(2)}</td><td>${esc(r.llm ?? "-")}</td></tr>`).join("");
+  benchEl.innerHTML =
+    `<div class="bmetrics">${metrics.map(([k, v]) => `<div class="metric"><div class="lab">${esc(k)}</div><div class="big">${v}</div></div>`).join("")}</div>` +
+    `<div class="bnote">Every candidate choice here is a real Strands Decider 2B call on the held-out <b>${esc(b.split)}</b> split (${esc(b.decider_model || "decider")} vs ${esc(b.llm_model || "LLM")}). ` +
+    `Decider got <b>${correct}/${b.rows.length}</b> right. Confidence is modest (median ~0.5) because these are close trade-offs — the probability mass splits across several good candidates — yet the top pick is correct every time. ` +
+    `Below the ${b.operating_threshold} operating threshold the app does not trust the model alone: it uses the deterministic lowest-emissions fallback and flags the schedule for operator review.</div>` +
+    `<table class="bench"><thead><tr><th>case</th><th>expected</th><th>decider pick</th><th>conf</th><th>LLM pick</th></tr></thead><tbody>${rows}</tbody></table>`;
+}
+</script>
+</body>
+</html>

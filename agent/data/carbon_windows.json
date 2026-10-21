@@ -1,0 +1,21 @@
+[
+ {"region": "ap-south-1", "start_offset_hours": 0.0,  "carbon_intensity_kg_per_kwh": 0.71},
+ {"region": "ap-south-1", "start_offset_hours": 4.0,  "carbon_intensity_kg_per_kwh": 0.63},
+ {"region": "ap-south-1", "start_offset_hours": 6.0,  "carbon_intensity_kg_per_kwh": 0.52},
+ {"region": "ap-south-1", "start_offset_hours": 10.0, "carbon_intensity_kg_per_kwh": 0.58},
+
+ {"region": "us-east-1", "start_offset_hours": 0.0,  "carbon_intensity_kg_per_kwh": 0.42},
+ {"region": "us-east-1", "start_offset_hours": 3.0,  "carbon_intensity_kg_per_kwh": 0.38},
+ {"region": "us-east-1", "start_offset_hours": 6.0,  "carbon_intensity_kg_per_kwh": 0.30},
+ {"region": "us-east-1", "start_offset_hours": 10.0, "carbon_intensity_kg_per_kwh": 0.35},
+
+ {"region": "eu-west-1", "start_offset_hours": 0.0,  "carbon_intensity_kg_per_kwh": 0.33},
+ {"region": "eu-west-1", "start_offset_hours": 4.0,  "carbon_intensity_kg_per_kwh": 0.23},
+ {"region": "eu-west-1", "start_offset_hours": 6.0,  "carbon_intensity_kg_per_kwh": 0.19},
+ {"region": "eu-west-1", "start_offset_hours": 10.0, "carbon_intensity_kg_per_kwh": 0.27},
+
+ {"region": "eu-north-1", "start_offset_hours": 0.0,  "carbon_intensity_kg_per_kwh": 0.12},
+ {"region": "eu-north-1", "start_offset_hours": 4.0,  "carbon_intensity_kg_per_kwh": 0.09},
+ {"region": "eu-north-1", "start_offset_hours": 6.0,  "carbon_intensity_kg_per_kwh": 0.05},
+ {"region": "eu-north-1", "start_offset_hours": 10.0, "carbon_intensity_kg_per_kwh": 0.08}
+]
