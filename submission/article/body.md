@@ -91,6 +91,6 @@ All data in this project is synthetic and labelled as such. Estimated emissions 
 
 ---
 
-Code: [paste the public GitHub repo URL after ./kit publish] . Video: [paste the public YouTube or Vimeo link after upload] . Tags: #strands-decider-2b #tool-selection
+Code: https://github.com/vjraghavanv/carbonshift-ai . Video: [paste the public YouTube or Vimeo link after upload] . Tags: #strands-decider-2b #tool-selection
 
 Built with the AWS User Group Madurai Strands Decider hackathon kit
