@@ -8,7 +8,7 @@ A lot of cloud work does not have to run the instant it is queued. Nightly rollu
 
 Watch the two-minute demo (running on AWS):
 
-< VIDEO: paste the public YouTube or Vimeo URL on its own line here; Builder Center expands it into an inline player >
+https://youtu.be/WnEWH1dJJQ4
 
 CarbonShift AI is for platform and SRE teams who run flexible batch, analytics, ETL, reporting and training jobs and want to cut the carbon of that compute without missing a deadline or breaking a commitment.
 
@@ -111,6 +111,6 @@ If I had to name one takeaway for anyone starting a decider project, it is this:
 
 ---
 
-Code: https://github.com/vjraghavanv/carbonshift-ai . Video: [paste the public YouTube or Vimeo link after upload] . Tags: #strands-decider-2b #tool-selection
+Code: https://github.com/vjraghavanv/carbonshift-ai . Video: https://youtu.be/WnEWH1dJJQ4 . Tags: #strands-decider-2b #tool-selection
 
 Built with the AWS User Group Madurai Strands Decider hackathon kit
