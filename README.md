@@ -6,6 +6,7 @@ An agent on AWS that hands one decision to **Strands Decider 2B** and the conver
 
 - Video: https://youtu.be/WnEWH1dJJQ4
 - Article: https://builder.aws.com/content/3Kz73pb35EhdHKR6GNfFL95Cmwz/carbonshift-ai-schedule-smarter-compute-cleaner
+- Notebook: [`notebooks/carbonshift_ai.ipynb`](notebooks/carbonshift_ai.ipynb) - a runnable tour of the decision pattern, the fallback and the benchmark
 - Deployed: Amazon Bedrock AgentCore Runtime, us-east-1
 
 ## The project
