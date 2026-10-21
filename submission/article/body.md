@@ -6,6 +6,10 @@ A lot of cloud work does not have to run the instant it is queued. Nightly rollu
 
 ## The project
 
+Watch the two-minute demo (running on AWS):
+
+< VIDEO: paste the public YouTube or Vimeo URL on its own line here; Builder Center expands it into an inline player >
+
 CarbonShift AI is for platform and SRE teams who run flexible batch, analytics, ETL, reporting and training jobs and want to cut the carbon of that compute without missing a deadline or breaking a commitment.
 
 What it does, as a product:
